@@ -1,34 +1,78 @@
-<?php 
+<?php
 
-class Etzel {
+require('vendor/autoload.php');
 
+use WebSocket\Client;
 
-function isleep($qname) {
-    // $x = new stdClass();
-    // $x->qname=$qname;
-    // $x->cmd = "ISLP";
-    //$data = json_decode($x);
-    $query = array('qname' =>$qname ,'cmd'=>'ISLP');
-     $szStr = serialize($query);
-    
-   // console.log(Obj.qname + Obj.cmd);
-    $sock = socket_create(AF_INET, SOCK_STREAM, 0);
-    socket_connect($sock , '127.0.0.1' , 80);
-   if( ! socket_send ( $sock , $szStr , strlen($szStr) , 0))  {
-    $errorcode = socket_last_error();
-    $errormsg = socket_strerror($errorcode);
-     
-    die("Could not send data: [$errorcode] $errormsg \n");
-        }
+ 
+//$client = new Client("ws://localhost:80");
+ function isleep($qname) {
+    $obj = new stdClass();
+    $obj->qname=$qname;
+    $obj->cmd = "ISLP";
+    $data = json_encode($obj);
+        $client = new Client("ws://echo.websocket.org/");
+         $client->send($data);
          echo "message was sent successfully bitch";
     }
+function publish($qname,$msg,$options)
+{
+    $obj = new stdClass();
+    $obj->qname=$qname;
+    $obj->cmd="PUB";
+    $obj->delay=0;
+    $obj->expires=0;
+     $data = json_encode($obj);
+
+    if($options->delay != 0){
+
+        $obj->delay = $options->delay;
+    }
+
+    if($options->expires != 0){
+
+       $obj->expires = $options->expires;
+    }
+    $client = new Client("ws://echo.websocket.org/");
+     $client->send($data);
+     echo "message was published successfully bitch";
+
+}
+function acknowledge($qname,$uid)
+{
+    $obj = new stdClass();
+    $obj->qname=$qname;
+    $obj->cmd="ACK";
+    $obj->uid=$uid;
+    $data=json_encode($obj);
+
+     $client = new Client("ws://echo.websocket.org/");
+     $client->send($data);
+     echo "message was acknowledged successfully bitch";
 
 
 
 
 
 }
+function fetch($qname)
+{
+    $obj = new stdClass();
+    $obj->qname=$qname;
+    $obj->cmd="FET";
+    $data=json_encode($obj);
 
-$e=new Etzel();
-$e->isleep("d");
- ?>
+     $client = new Client("ws://echo.websocket.org/");
+     $client->send($data);
+   
+ echo "done";
+
+}
+$obj = new stdClass();
+    $obj->qname="eeewr";
+    $obj->cmd="PUB";
+    $obj->delay=0;
+    $obj->expires=0;
+    fetch("ds");
+
+?>
