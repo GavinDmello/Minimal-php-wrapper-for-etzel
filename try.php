@@ -1,13 +1,22 @@
 <?php
-
+namespace etzelclient;
 require('vendor/autoload.php');
 
 use WebSocket\Client;
 
  
 //$client = new Client("ws://localhost:80");
+class etzel extends Client {
+    public function __construct($uri) {
+        $this->fragment_count = array(
+            'send' => 0,
+            'receive' => 0,
+        );
+        return parent::__construct($uri);
+    }
+
  function isleep($qname) {
-    $obj = new stdClass();
+    $obj = new \stdClass();
     $obj->qname=$qname;
     $obj->cmd = "ISLP";
     $data = json_encode($obj);
@@ -57,7 +66,7 @@ function acknowledge($qname,$uid)
 }
 function fetch($qname)
 {
-    $obj = new stdClass();
+    $obj = new \stdClass();
     $obj->qname=$qname;
     $obj->cmd="FET";
     $data=json_encode($obj);
@@ -68,11 +77,8 @@ function fetch($qname)
  echo "done";
 
 }
-$obj = new stdClass();
-    $obj->qname="eeewr";
-    $obj->cmd="PUB";
-    $obj->delay=0;
-    $obj->expires=0;
-    fetch("ds");
+}
+$obj = new etzel("ws://echo.websocket.org/");
+   $obj->fetch("ds");
 
 ?>
