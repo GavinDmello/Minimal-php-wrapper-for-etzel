@@ -26,7 +26,7 @@ class etzel extends Client {
     }
 function publish($qname,$msg,$options)
 {
-    $obj = new stdClass();
+    $obj = new \stdClass();
     $obj->qname=$qname;
     $obj->cmd="PUB";
     $obj->delay=0;
@@ -42,26 +42,22 @@ function publish($qname,$msg,$options)
 
        $obj->expires = $options->expires;
     }
-    $client = new Client("ws://echo.websocket.org/");
+   // $client = new Client("ws://echo.websocket.org/");
      $client->send($data);
      echo "message was published successfully bitch";
 
 }
 function acknowledge($qname,$uid)
 {
-    $obj = new stdClass();
+    $obj = new \stdClass();
     $obj->qname=$qname;
     $obj->cmd="ACK";
     $obj->uid=$uid;
     $data=json_encode($obj);
 
-     $client = new Client("ws://echo.websocket.org/");
+    // $client = new Client("ws://echo.websocket.org/");
      $client->send($data);
      echo "message was acknowledged successfully bitch";
-
-
-
-
 
 }
 function fetch($qname)
@@ -71,7 +67,7 @@ function fetch($qname)
     $obj->cmd="FET";
     $data=json_encode($obj);
 
-     $client = new Client("ws://echo.websocket.org/");
+     //$client = new Client("ws://echo.websocket.org/");
      $client->send($data);
    
  echo "done";
