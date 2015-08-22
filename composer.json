@@ -1,0 +1,9 @@
+{
+	"name":"bat_coder/etzelclient",
+	"version":"0.1.0",
+    "require": {
+        "textalk/websocket": "1.0.*"
+    }
+    
+
+}

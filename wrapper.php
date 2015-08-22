@@ -1,37 +1,103 @@
 <?php
-class Etzelclient {
-if(!($sock = socket_create(AF_INET, SOCK_STREAM, 0)))
+namespace etzelclient;
+require('vendor/autoload.php');
+
+use WebSocket\Client;
+
+ 
+//$client = new Client("ws://localhost:80");
+class etzel extends Client {
+    private $qbacks=array();
+public function __construct($uri) {
+        return parent::__construct($uri);
+    }
+
+ function isleep($qname) {
+    $obj = new \stdClass();
+    $obj->qname=$qname;
+    $obj->cmd = "ISLP";
+    $data = json_encode($obj);
+    parent::send($data);
+    }
+function publish($qname,$msg)
 {
-    $errorcode = socket_last_error();
-    $errormsg = socket_strerror($errorcode);
-     
-    die("Couldn't create socket: [$errorcode] $errormsg \n");
+    $obj = new \stdClass();
+    $obj->qname=$qname;
+    $obj->cmd="PUB";
+    $obj->delay=0;
+    $obj->expires=0;
+     $data = json_encode($obj);
+
+    if($options->delay != 0){
+
+        $obj->delay = $options->delay;
+    }
+
+    if($options->expires != 0){
+
+       $obj->expires = $options->expires;
+    }
+     parent::send($data);
+
 }
- 
-echo "Socket created \n";
- 
-//Connect socket to remote server
-if(!socket_connect($sock , '127.0.0.1' , 80))
+function acknowledge($qname,$uid)
 {
-    $errorcode = socket_last_error();
-    $errormsg = socket_strerror($errorcode);
-     
-    die("Could not connect: [$errorcode] $errormsg \n");
+    $obj = new \stdClass();
+    $obj->qname=$qname;
+    $obj->cmd="ACK";
+    $obj->uid=$uid;
+    $data=json_encode($obj);
+
+    parent::send($data);
+    $this->onmessage();
+
 }
- 
-echo "Connection established \n";
- 
-$message = "GET / HTTP/1.1\r\n\r\n";
- 
-//Send the message to the server
-if( ! socket_send ( $sock , $message , strlen($message) , 0))
+function onmessage(){
+   $evt=parent::receive();
+   $data=json_decode($evt->data);
+   if($data->cmd=='awk')
+   {
+    $this.fetch($data->qname);
+
+   }
+   if($data->cmd=='nomsg')
+   {
+    $this->isleep($data->qname);
+   }
+   if($data->cmd=='msg'){
+    $this->qbacks[$data->qname]($data->msg);
+    $this->fetch($data->qname);
+   }
+
+
+
+}
+function fetch($qname)
 {
-    $errorcode = socket_last_error();
-    $errormsg = socket_strerror($errorcode);
-     
-    die("Could not send data: [$errorcode] $errormsg \n");
+    $obj = new \stdClass();
+    $obj->qname=$qname;
+    $obj->cmd="FET";
+    $data=json_encode($obj);
+    parent::send($data);
+   // echo "done";
 }
- 
-echo "Message send successfully \n";
+function subsendcmd($qname)
+{
+    $obj = new \stdClass();
+    $obj->qname=$qname;
+    $obj->cmd="SUB";
+    $data=json_encode($obj);
+    parent::send($data);
 }
+function subscribe($qname,$callback)
+{
+    
+    $this->subsendcmd($qname);
+    $qbacks[$qname]=$callback;
+    $this->fetch($qname);
+}
+}
+$obj = new etzel("ws://echo.websocket.org/");
+   $obj->acknowledge("dsf","mycallback");
+
 ?>
