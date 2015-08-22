@@ -1,18 +1,8 @@
 
 
-#Nodejs & javascript client for Etzel server:-
+#PHP client for Etzel server:-
 
-You can install the node client by opening a command prompt and using the following command
 
-````
-npm install etzelclient
-````
-
-then include the library in your .js file:
-
-````
-require('etzelclient');
-````
 
 #### 1. publish(queuename,message,options)
 
@@ -20,13 +10,17 @@ This pushes a message to etzel server.The arguments required are queuename (whic
 
 Example:-
 ````
-etzelclient=require("etzelclient");
+<?php
 
-ec=new etzelclient("ws://localhost:8080/connect");
-ec.onopen=function(){
-    ec.publish('test','hi');
+$etzel = new EtzelClient("ws://127.0.0.1:8080/connect");
 
+$emails= ["abc@example.com","def@example.com","hij@example.com"];
+
+foreach($emails as $email){
+    
+    $etzel->publish("group1", $email);
 }
+?>
 ````
 
 test is the queuename,hi is the message and the delay is 0 seconds
@@ -34,7 +28,7 @@ test is the queuename,hi is the message and the delay is 0 seconds
 additional options for publish:
 
 ````
-    ec.publish('test','hi',{delay:5,expires:3600,priority:0});
+    $etzel->publish('test','hi',{delay:5,expires:3600,priority:0});
 ````
 
 * `delay`: The item will not be available on the queue until this many seconds have passed.
@@ -54,20 +48,8 @@ The subscribe function is fetches a message from the etzel server. The argument 
 Example:-
 
 ````
-etzelclient=require("etzelclient");
 
-ec=new etzelclient("ws://localhost:8080/connect");
-
-//function which the end user writes
-function mycallback(data){
-
-    console.log(data.msg+" from the queue");
-    ec.acknowledge("test",data.uid);
-
-}
-ec.onopen=function(){
-    ec.subscribe("test",mycallback);
-}
+    ec->subscribe("test",cb);
 
 ````
 Here test is the queuename.
