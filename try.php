@@ -7,11 +7,8 @@ use WebSocket\Client;
  
 //$client = new Client("ws://localhost:80");
 class etzel extends Client {
-    public function __construct($uri) {
-        $this->fragment_count = array(
-            'send' => 0,
-            'receive' => 0,
-        );
+    private $qbacks=array();
+public function __construct($uri) {
         return parent::__construct($uri);
     }
 
@@ -20,11 +17,9 @@ class etzel extends Client {
     $obj->qname=$qname;
     $obj->cmd = "ISLP";
     $data = json_encode($obj);
-        $client = new Client("ws://echo.websocket.org/");
-         $client->send($data);
-         echo "message was sent successfully bitch";
+    parent::send($data);
     }
-function publish($qname,$msg,$options)
+function publish($qname,$msg)
 {
     $obj = new \stdClass();
     $obj->qname=$qname;
@@ -42,9 +37,7 @@ function publish($qname,$msg,$options)
 
        $obj->expires = $options->expires;
     }
-   // $client = new Client("ws://echo.websocket.org/");
-     $client->send($data);
-     echo "message was published successfully bitch";
+     parent::send($data);
 
 }
 function acknowledge($qname,$uid)
@@ -55,9 +48,28 @@ function acknowledge($qname,$uid)
     $obj->uid=$uid;
     $data=json_encode($obj);
 
-    // $client = new Client("ws://echo.websocket.org/");
-     $client->send($data);
-     echo "message was acknowledged successfully bitch";
+    parent::send($data);
+    $this->onmessage();
+
+}
+function onmessage(){
+   $evt=parent::receive();
+   $data=json_decode($evt->data);
+   if($data->cmd=='awk')
+   {
+    $this.fetch($data->qname);
+
+   }
+   if($data->cmd=='nomsg')
+   {
+    $this->isleep($data->qname);
+   }
+   if($data->cmd=='msg'){
+    $this->qbacks[$data->qname]($data->msg);
+    $this->fetch($data->qname);
+   }
+
+
 
 }
 function fetch($qname)
@@ -66,15 +78,26 @@ function fetch($qname)
     $obj->qname=$qname;
     $obj->cmd="FET";
     $data=json_encode($obj);
-
-     //$client = new Client("ws://echo.websocket.org/");
-     $client->send($data);
-   
- echo "done";
-
+    parent::send($data);
+   // echo "done";
+}
+function subsendcmd($qname)
+{
+    $obj = new \stdClass();
+    $obj->qname=$qname;
+    $obj->cmd="SUB";
+    $data=json_encode($obj);
+    parent::send($data);
+}
+function subscribe($qname,$callback)
+{
+    
+    $this->subsendcmd($qname);
+    $qbacks[$qname]=$callback;
+    $this->fetch($qname);
 }
 }
 $obj = new etzel("ws://echo.websocket.org/");
-   $obj->fetch("ds");
+   $obj->acknowledge("dsf","mycallback");
 
 ?>
