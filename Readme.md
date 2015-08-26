@@ -1,6 +1,13 @@
 
 
 #PHP client for Etzel server:-
+In your composer.json file add
+{
+    "minimum-stability": "dev",
+    "require": {
+        "bat_coder/etzelclient": "dev-master"
+    }
+}
 
 
 
