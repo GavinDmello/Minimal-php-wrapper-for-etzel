@@ -1,5 +1,6 @@
 {
-	"name":"bat_coder/etzelclient",
+	"name":"etzel/etzelclient",
+    "minimum-stability": "stable",
 	"version":"0.1.0",
 	"description":"A minimal PHP library which connects to etzel server",
 	"keywords":["queue","etzel","messaging queue"],
